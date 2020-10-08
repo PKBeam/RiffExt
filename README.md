@@ -2,7 +2,7 @@
 
 This is a program to extract RIFF data from files. 
 
-Although originally made to rip music from Baldur's Gate 3 game archives, this should work for any arbitrary file.
+Although originally made to rip music from Baldur's Gate 3 game archives (`LSPK`), this should work for any file that doesn't compress or encrypt the RIFF data.
 
 Output files have the `.wem` extension. 
 
