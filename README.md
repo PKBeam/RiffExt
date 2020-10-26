@@ -18,7 +18,7 @@ You can download the `.exe` from the [Releases](https://github.com/PKBeam/RiffEx
 
 In a Command Prompt, type:
 
-`> riffext.exe <filename>`  
+`riffext.exe <filename>`  
 
 **macOS/Linux**  
 
