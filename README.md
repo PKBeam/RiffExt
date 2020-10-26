@@ -14,6 +14,10 @@ On macOS/Linux, compile `riffext.c`.
 ## Usage
 **Windows**  
 
+You can download the `.exe` from the [Releases](https://github.com/PKBeam/RiffExt/releases/) section.
+
+In a Command Prompt, type:
+
 `> riffext.exe <filename>`  
 
 **macOS/Linux**  
