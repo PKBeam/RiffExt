@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
                 char outname[32];
                 snprintf(outname, 31, "%i.wem", ++nfiles);
 
-                FILE* out = fopen(outname, "w");
+                FILE* out = fopen(outname, "wb");
                 fwrite("RIFF", 1, 4, out);
                 fwrite(&filesize, 1, 4, out);
                 for (int i = 0; i < filesize; i++) {
