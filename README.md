@@ -30,7 +30,7 @@ In a Command Prompt, type:
 
 #### Baldur's Gate 3
 
-For Baldur's Gate 3, the sound files are stored in the `/Data` folder, in `SharedSounds.pak` and `SharedSoundBanks.pak` (the music seems to be in files 12839 to 13025 in the latter).
+For Baldur's Gate 3, the sound files are stored in the `/Data` folder, in `SharedSounds.pak` and `SharedSoundBanks.pak` (as of Patch 3, the music seems to be in files 13870 to 14055 in the latter).
   Use [ww2ogg](https://github.com/hcs64/ww2ogg) with the alternate packed codebooks (or [Divinity Converter](https://steamcommunity.com/sharedfiles/filedetails/?id=297292305)) to turn the `.wem` files into a playable `.ogg` format.
 
 #### Assassin's Creed Valhalla
