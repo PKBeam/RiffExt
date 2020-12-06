@@ -6,7 +6,7 @@ Although originally made to rip audio from Baldur's Gate 3 game archives (`.pak`
 
 Output files have the `.wem` extension. 
 
-Note that the way this program identifies RIFF data is quite crude - it only checks for the raw data `RIFF`, which means that sometimes it will output files that are not actually RIFF files.
+Note that the way this program identifies RIFF data is quite crude - it only checks for the raw data `RIFF`, which means that sometimes it will find false positives, i.e. it will output files that are not actually RIFF files.
 
 ## Building
 On Windows, compile `riffext_win.c`. 
