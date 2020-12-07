@@ -11,14 +11,7 @@ The program identifies RIFF files by the strings `RIFF`, `WAVE` and `fmt` in the
 ## RiffScan
 
 This utility scans files and displays info on any RIFF files inside. It's useful to scope out a data file before you start extracting anything.
-
-**Example**
-```
-$ riffscan.exe soundbank.dat
-file 1 | format: 0xFFFF, size: 2385.2kB, length: 2:08, bitrate: 148.1kbps, sample rate: 48.0kHz, channels: 2
-file 2 | format: 0xFFFE, size: 1013.6kB, length: 0:14, bitrate: 576.0kbps, sample rate: 36.0kHz, channels: 1
-file 3 | format: 0xFFFE, size: 163.9kB, length: 0:02, bitrate: 576.0kbps, sample rate: 36.0kHz, channels: 1
-```
+RiffScan outputs in CSV text (separated by commas).
 
 ## Usage
 **Windows**  
@@ -38,6 +31,25 @@ Then type in bash:
 
 `$ ./riffext <filename>`  
 `$ ./riffscan <filename>`  
+
+----
+
+### RiffExt args
+
+You can use `-m` to set a minimum filesize (in bytes) for extraction, **or** `-i` to extract a file at a certain index (starting from 1).
+
+```
+riffext.exe soundbank.dat -m 500000
+riffext.exe soundbank.dat -i 900
+```
+### RiffScan args
+
+RiffScan normally does a couple more checks that RiffExt doesn't, so if something's not working try the argument `-s`.
+
+```
+riffscan.exe soundbank.dat > out.csv
+riffscan.exe other_soundbank.dat -s > out.csv
+```
 
 ### Extracting Video Game Sound Files
 
