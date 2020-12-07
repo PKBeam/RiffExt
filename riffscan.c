@@ -69,27 +69,27 @@ int main(int argc, char** argv) {
             printf(
                 "file %i | format: 0x%04X, size: %.01lfkB, length: N/A, bitrate: %.01lfkbps, sample rate: %.01lfkHz, channels: %i, bits/sample: %i\n",
                 nfiles,
-                (int) audioFormat,
-                (double) filesize/1000.0,
-                (double) byteRate * 8.0/1000.0,
-                (double) sampleRate/1000.0,
-                (int) numChannels,
-                (int) bitsPerSample
+                (int)audioFormat,
+                (double)filesize / 1000.0,
+                (double)byteRate * 8.0 / 1000.0,
+                (double)sampleRate / 1000.0,
+                (int)numChannels,
+                (int)bitsPerSample
             );
             advanceFP(f, filesize - 32);
             continue;
         }
 
-        uint32_t numSamples;
+        double numSamples;
         dataSize = fmtSize - 16;
 
         // wwise audio stores this differently
         if (audioFormat == 0xFFFF) {
             advanceFP(f, 8);
-            if (fread(&numSamples, 1, 4, f) < 4) goto cleanup;
+            uint32_t samples;
+            if (fread(&samples, 1, 4, f) < 4) goto cleanup;
             dataSize -= 12;
-        } else {
-            numSamples = ((dataSize / numChannels) / bitsPerSample) * 8;
+            numSamples = (double)samples;
         }
 
         // read chunks until we find data chunk
@@ -99,18 +99,20 @@ int main(int argc, char** argv) {
             if (fread(&dataSize, 1, 4, f) < 4) goto cleanup;
         } while (strncmp(buf, "data", 4) != 0);
 
-
-        double length = ((double) numSamples) / ((double)sampleRate);
+        if (audioFormat != 0xFFFF) {
+            numSamples = ((double)dataSize * 8.0 / numChannels) / bitsPerSample;
+        }
+        double length = ((double)numSamples) / ((double)sampleRate);
         printf(
             "file %i | format: 0x%04X, size: %.01lfkB, length: %i:%02i, bitrate: %.01lfkbps, sample rate: %.01lfkHz, channels: %i\n",
             nfiles,
-            (int) audioFormat,
-            (double) filesize/1000.0,
-            (int) (length/60),
-            ((int) length) % 60,
-            (double) byteRate * 8.0/1000.0,
-            (double) sampleRate/1000.0,
-            (int) numChannels
+            (int)audioFormat,
+            (double)filesize / 1000.0,
+            (int)(length / 60),
+            ((int)length) % 60,
+            (double)byteRate * 8.0 / 1000.0,
+            (double)sampleRate / 1000.0,
+            (int)numChannels
         );
         advanceFP(f, dataSize);
     }
