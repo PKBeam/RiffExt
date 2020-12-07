@@ -57,7 +57,6 @@ int main(int argc, char** argv) {
         fwrite(buffer, 1, filesize, out);
         fclose(out);
 
-        printf("file %i | filesize: %.01lfkB,\n", nfiles, (double) filesize/1000.0);
     }
 
     fclose(f);
