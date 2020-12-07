@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
                 puts("Invalid argument for -m");
                 return 1;
             }
+            printf("Using min size %li bytes\n", minSize);
         }
         if (strcmp(argv[2], "-i") == 0) {
             index = strtol(argv[3], NULL, 10);
@@ -38,6 +39,7 @@ int main(int argc, char** argv) {
                 puts("Invalid argument for -i");
                 return 1;
             }
+            printf("Extracting file number %li\n", index);
         }
     }
 
@@ -72,8 +74,9 @@ int main(int argc, char** argv) {
             advanceFP(f, filesize);
             continue;
         }
-        char outname[32] = {0};
-        snprintf(outname, 31, "%i.wem", nfiles);
+        int outnameLen = 16 + strlen(argv[1]);
+        char* outname = calloc(1, outnameLen);
+        snprintf(outname, outnameLen - 1, "%s_%i.wem", argv[1], nfiles);
 
         FILE* out = fopen(outname, "wb");
         fwrite("RIFF", 1, 4, out);

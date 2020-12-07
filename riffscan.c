@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
+
+#define ERR_LOG(x) fputs(x"\n", stderr)
 
 void advanceFP(FILE* f, int bytes) {
     for (int i = 0; i < bytes; i++) {
@@ -16,14 +19,16 @@ int main(int argc, char** argv) {
     }
 
     int simple = 0;
-    if (argc > 2 && strcmp(argv[2], "-s") == 0) {
-        simple = 1;
-        puts("Using simple output");
+    if (argc > 2) {
+        if (strcmp(argv[2], "-s") == 0) {
+            simple = 1;
+            ERR_LOG("Using simple output");
+        }
     }
 
     FILE* f = fopen(argv[1], "rb");
     if (f == NULL) {
-        puts("File doesn't exist");
+        ERR_LOG("File doesn't exist");
         return 1;
     }
 
@@ -32,6 +37,7 @@ int main(int argc, char** argv) {
     int nfiles = 0;
     char buf[9];
 
+    printf("file,format,size(KB),length,bitrate(kbps),sample rate(kHz),channels\n");
     for (int ch = fgetc(f); ch != EOF; ch = fgetc(f)) {
 
         if (ch != 'R') {
@@ -62,9 +68,10 @@ int main(int argc, char** argv) {
         }
         if (simple) {
             printf(
-                "file %i | size: %.01lfkB\n",
+                "%s_%i,,%.02lf,,,,\n",
+                argv[1],
                 nfiles,
-                (double)filesize / 1000.0
+                (double)filesize/1000.0
             );
             advanceFP(f, filesize - 8);
             continue;
@@ -90,7 +97,8 @@ int main(int argc, char** argv) {
         // unknown cases
         if (audioFormat != 0xFFFF && (bitsPerSample == 0 || numChannels == 0 || sampleRate == 0)) {
             printf(
-                "file %i | format: 0x%04X, size: %.01lfkB, length: N/A, bitrate: %.01lfkbps, sample rate: %.01lfkHz, channels: %i, bits/sample: %i\n",
+                "%s_%i,0x%04X,%.02lf,,%.01lf,%.01lf,%i,%i\n",
+                argv[1],
                 nfiles,
                 (int)audioFormat,
                 (double)filesize / 1000.0,
@@ -127,12 +135,13 @@ int main(int argc, char** argv) {
         }
         double length = ((double)numSamples) / ((double)sampleRate);
         printf(
-            "file %i | format: 0x%04X, size: %.01lfkB, length: %i:%02i, bitrate: %.01lfkbps, sample rate: %.01lfkHz, channels: %i\n",
+            "%s_%i,0x%04X,%.02lf,%i:%05.2lf,%.01lf,%.01lf,%i\n",
+            argv[1],
             nfiles,
             (int)audioFormat,
             (double)filesize / 1000.0,
             (int)(length / 60),
-            ((int)length) % 60,
+            fmod(length, 60),
             (double)byteRate * 8.0 / 1000.0,
             (double)sampleRate / 1000.0,
             (int)numChannels
@@ -140,8 +149,8 @@ int main(int argc, char** argv) {
         advanceFP(f, dataSize);
     }
     fclose(f);
-    printf(
-        "\n"
+    fprintf(
+        stderr,
         "%i files scanned\n"
         "largest file: %.01lfkB\n"
         "avg. filesize: %.01lfkB\n",
@@ -153,6 +162,6 @@ int main(int argc, char** argv) {
 
 cleanup:
     fclose(f);
-    puts("An error occurred reading the file.");
+    ERR_LOG("An error occurred reading the file.");
     return 1;
 }
