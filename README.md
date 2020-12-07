@@ -11,7 +11,11 @@ The program identifies RIFF files by the strings `RIFF`, `WAVE` and `fmt` in the
 ## RiffScan
 
 This utility scans files and displays info on any RIFF files inside. It's useful to scope out a data file before you start extracting anything.
-RiffScan outputs in CSV text (separated by commas).
+RiffScan outputs in CSV text (separated by commas). You can pipe the output directly to a file.
+
+```
+riffscan.exe soundbank.dat > out.csv
+```
 
 ## Usage
 **Windows**  
@@ -29,8 +33,8 @@ Compile the source code using your favourite C compiler.
 
 Then type in bash:
 
-`$ ./riffext <filename>`  
-`$ ./riffscan <filename>`  
+`./riffext <filename>`  
+`./riffscan <filename>`  
 
 ----
 
@@ -47,8 +51,7 @@ riffext.exe soundbank.dat -i 900
 RiffScan normally does a couple more checks that RiffExt doesn't, so if something's not working try the argument `-s`.
 
 ```
-riffscan.exe soundbank.dat > out.csv
-riffscan.exe other_soundbank.dat -s > out.csv
+riffscan.exe soundbank.dat -s
 ```
 
 ### Extracting Video Game Sound Files
