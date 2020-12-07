@@ -3,6 +3,12 @@
 #include <string.h>
 #include <stdint.h>
 
+void advanceFP(FILE* f, int bytes) {
+    for (int i = 0; i < bytes; i++) {
+        fgetc(f);
+    }
+}
+
 int main(int argc, char** argv) {
 
     if (argc < 2) {
@@ -13,6 +19,26 @@ int main(int argc, char** argv) {
     if (f == NULL) {
         puts("File doesn't exist");
         return 1;
+    }
+
+    long int minSize = -1;
+    long int index = -1;
+
+    if (argc > 3) {
+        if (strcmp(argv[2], "-m") == 0) {
+            minSize = strtol(argv[3], NULL, 10);
+            if (minSize <= 0) {
+                puts("Invalid argument for -m");
+                return 1;
+            }
+        }
+        if (strcmp(argv[2], "-i") == 0) {
+            index = strtol(argv[3], NULL, 10);
+            if (index <= 0) {
+                puts("Invalid argument for -i");
+                return 1;
+            }
+        }
     }
 
     int nfiles = 0;
@@ -41,6 +67,11 @@ int main(int argc, char** argv) {
         }
 
         nfiles++;
+
+        if ((index > 0 && index != nfiles) || (minSize > 0 && minSize > filesize)) {
+            advanceFP(f, filesize);
+            continue;
+        }
         char outname[32] = {0};
         snprintf(outname, 31, "%i.wem", nfiles);
 
@@ -58,8 +89,8 @@ int main(int argc, char** argv) {
         fclose(out);
 
     }
-
     fclose(f);
+    printf("%i files extracted\n", nfiles);
     return 0;
 
 cleanup:

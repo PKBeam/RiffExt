@@ -15,12 +15,20 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    int simple = 0;
+    if (argc > 2 && strcmp(argv[2], "-s") == 0) {
+        simple = 1;
+        puts("Using simple output");
+    }
+
     FILE* f = fopen(argv[1], "rb");
     if (f == NULL) {
         puts("File doesn't exist");
         return 1;
     }
 
+    int fsTotal = 0;
+    int fsMax = 0;
     int nfiles = 0;
     char buf[9];
 
@@ -47,6 +55,21 @@ int main(int argc, char** argv) {
         }
 
         nfiles++;
+
+        fsTotal += filesize;
+        if (fsMax < filesize) {
+            fsMax = filesize;
+        }
+        if (simple) {
+            printf(
+                "file %i | size: %.01lfkB\n",
+                nfiles,
+                (double)filesize / 1000.0
+            );
+            advanceFP(f, filesize - 8);
+            continue;
+        }
+
         uint32_t fmtSize;
         uint16_t audioFormat;
         uint16_t numChannels;
@@ -116,8 +139,16 @@ int main(int argc, char** argv) {
         );
         advanceFP(f, dataSize);
     }
-
     fclose(f);
+    printf(
+        "\n"
+        "%i files scanned\n"
+        "largest file: %.01lfkB\n"
+        "avg. filesize: %.01lfkB\n",
+        nfiles,
+        (double)fsMax/1000.0,
+        (double)fsTotal/nfiles/1000.0
+    );
     return 0;
 
 cleanup:
