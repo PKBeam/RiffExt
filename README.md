@@ -6,12 +6,14 @@ Although originally made to rip audio from Baldur's Gate 3 game archives (`.pak`
 
 Output files have the `.wem` extension. 
 
-Note that the way this program identifies RIFF data is quite crude - it only checks for the raw data `RIFF`, which means that sometimes it will find false positives, i.e. it will output files that are not actually RIFF files.
+The program identifies RIFF files by the strings `RIFF`, `WAVE` and `fmt` in the header.
+
+## RiffScan
+
+This utility scans RIFF files to show some information before you extract anything.
 
 ## Building
-On Windows, compile `riffext_win.c`. 
-
-On macOS/Linux, compile `riffext.c`. 
+Compile `riffext.c` and `riffscan.c`. 
 
 ## Usage
 **Windows**  
@@ -21,10 +23,12 @@ You can download the `.exe` from the [Releases](https://github.com/PKBeam/RiffEx
 In a Command Prompt, type:
 
 `riffext.exe <filename>`  
+`riffscan.exe <filename>`  
 
 **macOS/Linux**  
 
 `$ ./riffext <filename>`  
+`$ ./riffscan <filename>`  
 
 ### Extracting Video Game Sound Files
 
