@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
         }
     }
 
+    int nfilesExtracted = 0;
     int nfiles = 0;
     char buf[9];
 
@@ -71,7 +72,7 @@ int main(int argc, char** argv) {
         nfiles++;
 
         if ((index > 0 && index != nfiles) || (minSize > 0 && minSize > filesize)) {
-            advanceFP(f, filesize);
+            advanceFP(f, filesize - 8);
             continue;
         }
         int outnameLen = 16 + strlen(argv[1]);
@@ -90,10 +91,14 @@ int main(int argc, char** argv) {
         fread(buffer, 1, filesize, f);
         fwrite(buffer, 1, filesize, out);
         fclose(out);
+        nfilesExtracted++;
 
+        if (index == nfiles) {
+            break;
+        }
     }
     fclose(f);
-    printf("%i files extracted\n", nfiles);
+    printf("%i file(s) extracted\n", nfilesExtracted);
     return 0;
 
 cleanup:
