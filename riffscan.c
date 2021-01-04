@@ -18,11 +18,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    int simple = 0;
+    int simple = 2;
     if (argc > 2) {
-        if (strcmp(argv[2], "-s") == 0) {
+        if (strcmp(argv[2], "-s0") == 0) {
+            simple = 0;
+            ERR_LOG("Using option: no chunk parsing");
+        } else if (strcmp(argv[2], "-s1") == 0) {
             simple = 1;
-            ERR_LOG("Using simple output");
+            ERR_LOG("Using option: simple chunk parsing");
         }
     }
 
@@ -66,7 +69,7 @@ int main(int argc, char** argv) {
         if (fsMax < filesize) {
             fsMax = filesize;
         }
-        if (simple) {
+        if (simple == 0) {
             printf(
                 "%s_%i,,%.02lf,,,,\n",
                 argv[1],
@@ -124,11 +127,24 @@ int main(int argc, char** argv) {
         }
 
         // read chunks until we find data chunk
-        do {
-            advanceFP(f, dataSize);
-            if (fgets(buf, 5, f) == NULL) goto cleanup;
-            if (fread(&dataSize, 1, 4, f) < 4) goto cleanup;
-        } while (strncmp(buf, "data", 4) != 0);
+        if (simple == 1) { // simple chunk parsing - go to next "data" chunk
+            for (int ch = fgetc(f); ch != EOF; ch = fgetc(f)) {
+                if (ch == 'd') {
+                    if (fgets(buf, 4, f) == NULL) goto cleanup;
+                    if (strncmp(buf, "ata", 3) == 0) { 
+                        break;
+                    }
+                }
+            }
+        } else if (simple == 2) { // full chunk parsing - read each chunk as per RIFF standard
+            do {
+                advanceFP(f, dataSize);
+                if (fgets(buf, 5, f) == NULL) goto cleanup;
+                if (fread(&dataSize, 1, 4, f) < 4) goto cleanup;
+            } while (strncmp(buf, "data", 4) != 0);
+        }
+
+
 
         if (audioFormat != 0xFFFF) {
             numSamples = ((double)dataSize * 8.0 / numChannels) / bitsPerSample;
