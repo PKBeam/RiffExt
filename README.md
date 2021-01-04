@@ -48,24 +48,27 @@ riffext.exe soundbank.dat -i 900
 ```
 ### RiffScan args
 
-RiffScan normally does a couple more checks that RiffExt doesn't, so if something's not working try the argument `-s`.
+RiffScan normally does a few more checks that RiffExt doesn't, in order to get the information needed to calculate things like file size and play length. This may result in some files not scanning or scanning incorrectly, if they don't conform to the RIFF standard properly.
+
+When this is the case, you can use the arguments `-s0` or `-s1` to ignore these checks.
+
+The argument `-s0` performs no checks in addition to what RiffExt does, but will not output any information other than filesize.  
+
+The argument `-s1` performs less checks in addition to what RiffExt does, but may output incorrect information on some more complex RIFF files. For this reason, avoid using `-s1` unless the scan fails without it.
 
 ```
-riffscan.exe soundbank.dat -s
+riffscan.exe soundbank.dat -s0
+riffscan.exe soundbank.dat -s1
 ```
 
 ### Extracting Video Game Sound Files
 
-#### Baldur's Gate 3
+The [vgmstream](https://github.com/vgmstream/vgmstream) CLI tool is very helpful in converting extracted `.wem` files to playable formats.
 
-For Baldur's Gate 3, the sound files are stored in the `/Data` folder, in `SharedSounds.pak` and `SharedSoundBanks.pak` (as of Patch 3, the music seems to be in files 13870 to 14055 in the latter).
-  Use [ww2ogg](https://github.com/hcs64/ww2ogg) with the alternate packed codebooks (or [Divinity Converter](https://steamcommunity.com/sharedfiles/filedetails/?id=297292305)) to turn the `.wem` files into a playable `.ogg` format.
-
-#### Assassin's Creed Valhalla
-
-The files are in `sounddata/PC/`.
-The output `.wem` files will have a mix of OGG Vorbis and Opus codecs. You can use [vgmstream](https://github.com/vgmstream/vgmstream)'s CLI tool to decode the Opus files.
-
-----
-
-These tools will work for a lot of other games too, for example, Divinity: Original Sin 2 and The Elder Scrolls Online.
+These tools will work for a lot of games. Some games I've tested are:
+- Cyberpunk 2077
+- Assassin's Creed Valhalla
+- Tom Clancy's The Division 2 (you may need to use `-s1` with RiffScan for some files)
+- Divinity: Original Sin 2
+- Baldur's Gate 3
+- The Elder Scrolls Online (do not use `-s1` with RiffScan)
