@@ -54,7 +54,7 @@ When this is the case, you can use the arguments `-s0` or `-s1` to ignore these 
 
 The argument `-s0` performs no checks in addition to what RiffExt does, so it shows you exactly what you will get when you run RiffExt. However, it will not output any information other than filesize.  
 
-The argument `-s1` performs less checks than using RiffScan without an argument, but may output incorrect information on some more complex RIFF files. For this reason, avoid using `-s1` unless the scan fails without it.
+The argument `-s1` performs only some checks in addition to what RiffExt does, but may output incorrect information on some more complex RIFF files. For this reason, avoid using `-s1` unless the scan fails without it.
 
 ```
 riffscan.exe soundbank.dat -s0
