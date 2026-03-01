@@ -12,6 +12,7 @@ namespace Args {
         bool dump = false;
         bool scan = false;
         bool strictWav = false;
+        bool verbose = false;
         std::string_view inFile{};
     };
 
@@ -29,6 +30,8 @@ namespace Args {
                 opts.scan = true;
             } else if (arg == "-w" || arg == "--wav") {
                 opts.strictWav = true;
+            } else if (arg == "-v" || arg == "--verbose") {
+                opts.verbose = true;
             } else if (arg.starts_with("-")) {
                 std::println("Unrecognised argument {}", arg);
                 return std::nullopt;

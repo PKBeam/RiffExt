@@ -20,10 +20,9 @@ namespace Util {
 
     template<typename T>
     auto GetBytes(std::ifstream& file) -> T {
-        char buf[sizeof(T) + 1];
-        file.get(buf, sizeof(T) + 1);
-        T t;
-        std::memcpy(&t, buf, sizeof(T));
+        char buf[sizeof(T)];
+        file.read(buf, sizeof(T));
+        T t = std::bit_cast<T>(buf);
         return t;
     }
 
@@ -60,9 +59,9 @@ struct ChunkHeader {
 
     auto validId() -> bool {
         auto name = idName();
-        return std::all_of(name.begin(), name.end(), 
-            [](char c) { return std::isalnum(c) || c == ' '; }
-       );
+        return std::isalpha(name[0]) && std::all_of(name.begin(), name.end(),
+            [](char c) { return std::isalpha(c) || c == ' '; }
+        );
     }
 };
 static_assert(sizeof ChunkHeader == 8);
@@ -81,7 +80,7 @@ struct FmtChunk : ChunkHeader {
         case 0x0001: return "PCM";
         case 0x0003: return "Float";
         case 0xFFFF: return "WWise";
-        default: return std::format("Unknown ({})", format);
+        default: return std::format("Unknown ({:X})", format);
         }
     }
 

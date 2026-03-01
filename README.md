@@ -14,6 +14,7 @@ RiffExt [options] <input file>
 
 ### Options
 - `-h` Show help and exit.
+- `-v, --verbose` Verbose output.
 - `-d, --dump` Extract RIFF data to a file.
 - `-s, --scan` Scan the input file and show RIFF data.
 - `-w, --wav` Ignore RIFF files that don't contain WAV data.

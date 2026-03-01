@@ -39,8 +39,9 @@ auto processRiff(std::ifstream& file, RIFF::RiffData riff, Args::Options options
     auto fileSize = std::filesystem::file_size(options.inFile);
 
     auto startPos = file.tellg();
+    size_t sp = startPos;
     // probably a valid RIFF
-    std::print("RIFF @ 0x{:X}", (size_t)file.tellg());
+    std::print("RIFF @ 0x{:X}", (size_t)startPos);
     file.seekg(sizeof riff, std::ios::cur);
 
     if (options.scan) {
@@ -48,12 +49,19 @@ auto processRiff(std::ifstream& file, RIFF::RiffData riff, Args::Options options
             auto fmtChunk = RIFF::Util::GetBytes<RIFF::FmtChunk>(file);
             // if the fmt chunk is larger than the standard size, skip the extra data
             file.seekg(fmtChunk.size - (sizeof fmtChunk - sizeof RIFF::ChunkHeader), std::ios::cur);
-            RIFF::ChunkHeader chunk;
+            std::vector<RIFF::ChunkHeader> chunks;
             do {
-                chunk = RIFF::ReadChunk(file);
+                auto chunk = RIFF::ReadChunk(file);
                 assert(chunk.validId());
-            } while (chunk.idName() != RIFF::Chunks::data);
-            std::print(": {}, {}, {}", fmtChunk.duration(chunk.size), formatFileSize(riff.size), fmtChunk.description());
+                chunks.push_back(chunk);
+            } while (chunks.back().idName() != RIFF::Chunks::data);
+            std::print(": {:>5}, {:>10}, {}", fmtChunk.duration(chunks.back().size), formatFileSize(riff.size), fmtChunk.description());
+            if (options.verbose && !chunks.empty()) {
+                std::print("\n  ");
+                for (auto chunk : chunks) {
+                    std::print("(Chunk {}, size 0x{:X}) ", chunk.idName(), chunk.size);
+                }
+            }
         } else {
             std::print(" - Unknown chunk identifier {}", riff.chunkIdName());
         }
@@ -81,15 +89,16 @@ int main(int argc, const char* argv[]) {
 
     // read file in chunks
     file.seekg(RIFF::Chunks::IdSize, std::ios::cur);
-    unsigned numRiffs = 0;
     while (!file.eof()) {
         file.seekg(-1 * RIFF::Chunks::IdSize, std::ios::cur);
         file.read(buffer, BUFFER_SIZE);
+        if (file.eof()) { // hitting eof will disable any seeking, so clear it and remember to break later
+            file.clear();
+        }
         auto numRead = file.gcount();
         for (auto i = 0; i < numRead; ++i) {
             // check for prefix
-            const char* bufferPtr = buffer + i;
-            if (auto riff = RIFF::PeekRIFF(bufferPtr)) {
+            if (auto riff = RIFF::PeekRIFF(buffer + i)) {
                 if (riff->size > fileSize) { // definitely not a valid RIFF
                     continue;
                 }
@@ -100,13 +109,18 @@ int main(int argc, const char* argv[]) {
                 }
 
                 // align the file to the start of the RIFF
-                auto oldPos = file.tellg();
                 size_t end = file.tellg() == std::ifstream::pos_type(-1) ? fileSize : (size_t)file.tellg();
+                auto oldPos = file.tellg();
                 file.seekg(end - numRead + i, std::ios::beg);
                 processRiff(file, *riff, options);
                 // when finished, skip to the end of the RIFF
-                file.seekg((size_t)oldPos + riff->chunkSize(), std::ios::cur);
+                file.seekg(oldPos, std::ios::beg);
+                auto newPos = (size_t)oldPos + riff->chunkSize();
+                i += newPos - oldPos - 1;
             }
+        }
+        if (numRead < BUFFER_SIZE) {
+            break;
         }
     }
 	return 0;
