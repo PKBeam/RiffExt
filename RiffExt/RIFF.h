@@ -68,6 +68,7 @@ struct ChunkHeader {
 static_assert(sizeof ChunkHeader == 8);
 
 struct FmtChunk : ChunkHeader {
+    // only standard fields. extensions like WWise add extra ones
     uint16_t format;
     uint16_t channels;
     uint32_t frequency;

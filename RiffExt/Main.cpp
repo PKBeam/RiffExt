@@ -46,6 +46,7 @@ auto processRiff(std::ifstream& file, RIFF::RiffData riff, Args::Options options
     if (options.scan) {
         if (riff.isWav()) {
             auto fmtChunk = RIFF::Util::GetBytes<RIFF::FmtChunk>(file);
+            // if the fmt chunk is larger than the standard size, skip the extra data
             file.seekg(fmtChunk.size - (sizeof fmtChunk - sizeof RIFF::ChunkHeader), std::ios::cur);
             RIFF::ChunkHeader chunk;
             do {
@@ -98,11 +99,13 @@ int main(int argc, const char* argv[]) {
                     continue;
                 }
 
+                // align the file to the start of the RIFF
                 auto oldPos = file.tellg();
                 size_t end = file.tellg() == std::ifstream::pos_type(-1) ? fileSize : (size_t)file.tellg();
                 file.seekg(end - numRead + i, std::ios::beg);
                 processRiff(file, *riff, options);
-                file.seekg(oldPos, std::ios::cur);
+                // when finished, skip to the end of the RIFF
+                file.seekg((size_t)oldPos + riff->chunkSize(), std::ios::cur);
             }
         }
     }
