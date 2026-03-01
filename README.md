@@ -1,8 +1,8 @@
 # RiffExt
 
-This is a program to extract RIFF data from arbitrary files. 
+This is a program to extract RIFF data from arbitrary files such as video game archives or sound banks. 
 
-Although originally made to rip audio from Baldur's Gate 3, this should work for any file that doesn't do anything too weird to the RIFF headers.
+Although originally made to rip audio from Baldur's Gate 3, this will work for any game data file that doesn't compress or encrypt its contents (most of them don't).
 
 The program identifies RIFF files by the strings `RIFF`, `WAVE` and `fmt` in the header.
 

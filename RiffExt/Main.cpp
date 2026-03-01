@@ -34,6 +34,38 @@ void dumpFile(std::ifstream& inFile, size_t offset, size_t size, std::string_vie
     inFile.seekg(oldPos);
 }
 
+auto processRiff(std::ifstream& file, RIFF::RiffData riff, Args::Options options) {
+    auto filenameShort = std::filesystem::path(options.inFile).filename().string();
+    auto fileSize = std::filesystem::file_size(options.inFile);
+
+    auto startPos = file.tellg();
+    // probably a valid RIFF
+    std::print("RIFF @ 0x{:X}", (size_t)file.tellg());
+    file.seekg(sizeof riff, std::ios::cur);
+
+    if (options.scan) {
+        if (riff.isWav()) {
+            auto fmtChunk = RIFF::Util::GetBytes<RIFF::FmtChunk>(file);
+            file.seekg(fmtChunk.size - (sizeof fmtChunk - sizeof RIFF::ChunkHeader), std::ios::cur);
+            RIFF::ChunkHeader chunk;
+            do {
+                chunk = RIFF::ReadChunk(file);
+                assert(chunk.validId());
+            } while (chunk.idName() != RIFF::Chunks::data);
+            std::print(": {}, {}, {}", fmtChunk.duration(chunk.size), formatFileSize(riff.size), fmtChunk.description());
+        } else {
+            std::print(" - Unknown chunk identifier {}", riff.chunkIdName());
+        }
+    }
+    std::println();
+
+    if (options.dump) {
+        auto outFileName = std::format("{}_{}.dat", filenameShort, (size_t)startPos);
+        auto outFileSize = RIFF::Chunks::IdSize + 4 + riff.size;
+        dumpFile(file, startPos, outFileSize, outFileName);
+    }
+}
+
 int main(int argc, const char* argv[]) {
 	auto maybeOptions = Args::Parse(argc, argv);
     if (!maybeOptions) {
@@ -55,8 +87,8 @@ int main(int argc, const char* argv[]) {
         auto numRead = file.gcount();
         for (auto i = 0; i < numRead; ++i) {
             // check for prefix
-            if (auto riff = RIFF::FindRIFF(buffer + i)) {
-
+            const char* bufferPtr = buffer + i;
+            if (auto riff = RIFF::PeekRIFF(bufferPtr)) {
                 if (riff->size > fileSize) { // definitely not a valid RIFF
                     continue;
                 }
@@ -66,27 +98,11 @@ int main(int argc, const char* argv[]) {
                     continue;
                 }
 
-                // probably a valid RIFF
-
-                ++numRiffs;
-                size_t end = file.tellg() == std::ifstream::pos_type(-1) ? fileSize : (size_t) file.tellg();
-                size_t pos = end - (numRead - i);
-                std::println("RIFF {} at offset 0x{:X} with size {}", numRiffs, pos, formatFileSize(riff->size));
-
-                if (options.scan) {
-                    if (riff->isWav()) {
-                        RIFF::FmtChunk fmtChunk{buffer + i + sizeof *riff};
-                        std::println("  {}", fmtChunk.description());
-                    } else {
-                        std::println("  Unknown chunk identifier {}", riff->chunkIdName());
-                    }
-                }
-
-                if (options.dump) {
-                    auto outFileName = std::format("{}_{}.dat", filenameShort, numRiffs);
-                    auto outFileSize = RIFF::Chunks::IdSize + 4 + riff->size;
-                    dumpFile(file, pos, outFileSize, outFileName);
-                }
+                auto oldPos = file.tellg();
+                size_t end = file.tellg() == std::ifstream::pos_type(-1) ? fileSize : (size_t)file.tellg();
+                file.seekg(end - numRead + i, std::ios::beg);
+                processRiff(file, *riff, options);
+                file.seekg(oldPos, std::ios::cur);
             }
         }
     }

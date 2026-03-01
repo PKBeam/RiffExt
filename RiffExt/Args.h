@@ -51,6 +51,7 @@ namespace Args {
     }
 
     auto Parse(int argc, const char* argv[]) -> std::optional<Options> {
+        return Args::Parse({ "--scan", "G:/Uplay Library/Tom Clancy's The Division 2/hunter/sdf/pc/data/sdf-D-3997.sdfdata"});
         if (argc < 2) {
             return std::nullopt;
         }
