@@ -18,6 +18,7 @@ RiffExt [options] <input file>
 - `-d, --dump` Extract RIFF data to a file.
 - `-s, --scan` Scan the input file and show RIFF data.
 - `-w, --wav` Ignore RIFF files that don't contain WAV data.
+- `--filter-min-duration=<seconds>` Ignore RIFF files with unknown or shorter duration than the specified value.
 
 ### Extracting Video Game Sound Files
 
