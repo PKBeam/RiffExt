@@ -41,9 +41,13 @@ auto scanRiff(
     size_t startOffset, 
     Args::Options options
 ) -> std::optional<double> {
+    auto riffInfo = std::format("{}, RIFF @ 0x{:010X}, {:>10}",
+                                filenameShort,
+                                startOffset,
+                                formatFileSize(riff.size));
     if (!riff.isWav()) {
         if (options.verbose) {
-            std::print("Unknown chunk identifier {}", riff.chunkIdName());
+            std::println("{}, Unknown chunk identifier {}", riffInfo, riff.chunkIdName());
         }
         return std::nullopt;
     }
@@ -53,7 +57,7 @@ auto scanRiff(
     auto fileSize = std::filesystem::file_size(options.inFile);
     if ((size_t)prevPos + fmtChunk.size > fileSize) {
         if (options.verbose) {
-            std::print("Bad fmt chunk size found, skipping scan...");
+            std::println("{}, Bad fmt chunk found", riffInfo);
         }
         return std::nullopt;
     }
@@ -64,7 +68,7 @@ auto scanRiff(
         auto chunk = RIFF::ReadChunk(file);
         if (!chunk.validId()) {
             if (options.verbose) {
-                std::print("Unknown chunk ID found, skipping scan...");
+                std::println("{}, Unknown WAV chunk ID {:X}", riffInfo, chunk.id);
             }
             return std::nullopt;
         }
@@ -72,14 +76,7 @@ auto scanRiff(
     } while (chunks.back().idName() != RIFF::Chunks::data);
     auto duration = fmtChunk.duration(chunks.back().size);
     if (!options.minDuration || duration > *options.minDuration) {
-        std::println(
-            "{}, RIFF @ 0x{:X}, {:>5}, {:>10}, {}", 
-            filenameShort, 
-            startOffset, 
-            fmtChunk.durationString(duration), 
-            formatFileSize(riff.size), 
-            fmtChunk.description()
-        );
+        std::println("{}, {:>5}, {}", riffInfo, fmtChunk.durationString(duration), fmtChunk.description());
         if (options.verbose && !chunks.empty()) {
             std::print("  ");
             for (auto chunk : chunks) {
@@ -98,15 +95,15 @@ auto processRiff(std::ifstream& file, std::string_view filenameShort, RIFF::Riff
     file.seekg(sizeof riff, std::ios::cur);
 
     std::optional<double> duration;
-    if (options.scan) {
+    if (options.scan || options.minDuration) {
         duration = scanRiff(file, filenameShort, riff, (size_t)startPos, options);
     }
 
     if (options.dump) {
-        if (options.minDuration && (!duration || *duration > *options.minDuration)) {
+        if (options.minDuration && (!duration || *duration < *options.minDuration)) {
             return;
         }
-        auto outFileName = std::format("{}_{}.dat", filenameShort, (size_t)startPos);
+        auto outFileName = std::format("{}_{:010X}.dat", filenameShort, (size_t)startPos);
         auto outFileSize = RIFF::Chunks::IdSize + 4 + riff.size;
         dumpFile(file, startPos, outFileSize, outFileName);
     }
