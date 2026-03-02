@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <fstream>
 #include <optional>
@@ -59,8 +60,8 @@ struct ChunkHeader {
 
     auto validId() -> bool {
         auto name = idName();
-        return std::isalpha(name[0]) && std::all_of(name.begin(), name.end(),
-            [](char c) { return std::isalpha(c) || c == ' '; }
+        return (name[0] >= 0 && std::isalpha(name[0])) && std::all_of(name.begin(), name.end(),
+            [](char c) { return c >= 0 && (std::isalpha(c) || c == ' '); }
         );
     }
 };
@@ -79,18 +80,24 @@ struct FmtChunk : ChunkHeader {
         switch (format) {
         case 0x0001: return "PCM";
         case 0x0003: return "Float";
-        case 0xFFFF: return "WWise";
+        case 0xFFFE: return "WWise Vorbis";
+        case 0xFFFF: return "WWise PCM";
         default: return std::format("Unknown ({:X})", format);
         }
     }
 
-    auto duration(uint32_t dataSize) const -> std::string {
-        unsigned totalSeconds = dataSize / bytesPerSec;
-        auto minutes = totalSeconds / 60;
-        auto seconds = totalSeconds % 60;
-        return std::format("{}:{:02d}", minutes, seconds);
+    auto duration(uint32_t dataSize) const -> double {
+        return dataSize / bytesPerSec;
     }
 
+    auto durationString(double duration) const -> std::string {
+        unsigned minutes = duration / 60;
+        unsigned seconds = (uint64_t)std::round(duration) % 60;
+        return std::format("{}:{:02d}", minutes, seconds);
+    }
+    auto durationString(uint32_t dataSize) const -> std::string {
+        return durationString(duration(dataSize));
+    }
     auto description() const -> std::string {
         return std::format("{} Hz, {} channel, {} format", frequency, channels, formatName());
     }

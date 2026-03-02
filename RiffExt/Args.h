@@ -1,9 +1,11 @@
 #pragma once
 
+#include <limits>
 #include <ranges>
 #include <vector>
 #include <optional>
 #include <print>
+#include <string>
 #include <string_view>
 
 namespace Args {
@@ -13,6 +15,7 @@ namespace Args {
         bool scan = false;
         bool strictWav = false;
         bool verbose = false;
+        std::optional<size_t> minDuration;
         std::string_view inFile{};
     };
 
@@ -32,6 +35,18 @@ namespace Args {
                 opts.strictWav = true;
             } else if (arg == "-v" || arg == "--verbose") {
                 opts.verbose = true;
+            } else if (arg.starts_with("--filter-min-duration")) {
+                if (!arg.starts_with("--filter-min-duration=")) {
+                    std::println("Usage: --filter-min-duration=<TIME>", arg);
+                    return std::nullopt;
+                }
+                auto dur = arg.substr(arg.find("=") + 1, arg.size());
+                try {
+                    opts.minDuration = std::stoul(std::string(dur));
+                } catch (const std::exception& e) {
+                    std::println("Invalid scan filter duration {}", dur);
+                    return std::nullopt;
+                }
             } else if (arg.starts_with("-")) {
                 std::println("Unrecognised argument {}", arg);
                 return std::nullopt;
