@@ -12,6 +12,8 @@ The program identifies RIFF files by the strings `RIFF`, `WAVE` and `fmt` in the
 RiffExt [options] <input file>
 ```
 
+Binaries are provided for Windows, though this project should be buildable on Linux and macOS with standard CMake.
+
 ### Options
 - `-h` Show help and exit.
 - `-v, --verbose` Verbose output.
@@ -24,7 +26,7 @@ RiffExt [options] <input file>
 
 The [vgmstream](https://github.com/vgmstream/vgmstream) CLI tool is very helpful in converting extracted `.wem` files to playable `.wav` ones.
 
-If your `.wem` files have format `0xFFFF`, you can also use [ww2ogg](https://github.com/hcs64/ww2ogg) (optionally with the ReVorb tool) to convert them into `.ogg` format.
+If your output `.dat` files have a WWise format (`0xFFFF` or `0xFFFE`), you can also use [ww2ogg](https://github.com/hcs64/ww2ogg) (optionally with the ReVorb tool) to convert them into `.ogg` format.
 
 These tools will work for a lot of games. Some games I've tried are:
 - Cyberpunk 2077
